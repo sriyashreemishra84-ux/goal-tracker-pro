@@ -6,48 +6,57 @@
 <title>Goal Tracker Pro - Sriya</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-:root{--bg:#0F172A;--card:#1E293B;--primary:#2563EB;--text:#fff;--text-dim:#94A3B8;--border:#334155}
+:root{--bg:#0F172A;--card:#1E293B;--primary:#2563EB;--success:#10B981;--text:#fff;--text-dim:#94A3B8;--border:#334155}
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
-body{background:var(--bg);color:var(--text);padding:20px;min-height:100vh}
+body{background:var(--bg);color:var(--text);padding:16px 16px 80px 16px}
 .glass{background:rgba(30,41,59,0.7);backdrop-filter:blur(12px);border:1px solid var(--border)}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
-.header h1{font-size:28px}
-.header .name{color:var(--text-dim);font-size:16px;margin-top:4px}
-.btn{background:var(--primary);color:#fff;border:none;padding:14px 24px;border-radius:10px;cursor:pointer;font-weight:600;font-size:16px}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
-.card{padding:20px;border-radius:16px}
-.card h3{font-size:14px;color:var(--text-dim);margin-bottom:8px}
-.card .num{font-size:32px;font-weight:700}
+.header{margin-bottom:20px}
+.header h1{font-size:26px}
+.header.name{color:var(--text-dim);font-size:15px;margin-top:4px}
+.btn{background:var(--primary);color:#fff;border:none;padding:14px 24px;border-radius:10px;cursor:pointer;font-weight:600;font-size:16px;width:100%;margin-bottom:20px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.card{padding:16px;border-radius:14px;text-align:center}
+.card h3{font-size:12px;color:var(--text-dim);margin-bottom:6px}
+.card.num{font-size:24px;font-weight:700}
+.calendar{display:flex;gap:8px;overflow-x:auto;padding:12px 0;margin-bottom:20px}
+.day{min-width:60px;text-align:center;padding:12px 8px;border-radius:12px;background:var(--card)}
+.day.active{background:var(--primary)}
+.day.d{font-size:12px;color:var(--text-dim)}
+.day.n{font-size:18px;font-weight:700;margin-top:4px}
 .goal{border-left:4px solid var(--primary);padding:16px;margin:16px 0;border-radius:12px}
-.goal h3{font-size:18px;margin-bottom:6px}
-.goal .meta{color:var(--text-dim);font-size:14px;margin-bottom:12px}
-.goal .actions{display:flex;gap:10px}
-.goal .actions button{flex:1;padding:12px;border-radius:8px;border:none;cursor:pointer;font-weight:600}
+.goal h3{font-size:17px;margin-bottom:6px}
+.goal.meta{color:var(--text-dim);font-size:13px;margin-bottom:10px}
+.progress{width:100%;height:6px;background:var(--border);border-radius:3px;margin:12px 0;overflow:hidden}
+.progress-bar{height:100%;background:var(--success);width:0%;transition:.3s}
+.goal.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.goal.actions button{padding:10px;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:14px}
 .complete{background:var(--primary);color:#fff}
+.timer{background:#F59E0B;color:#000}
 .delete{background:#EF4444;color:#fff}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);padding:20px;z-index:999}
 .modal.show{display:flex;align-items:center;justify-content:center}
 .modal-content{padding:24px;border-radius:16px;width:100%;max-width:400px}
-.modal-content h2{margin-bottom:16px}
 input,select{width:100%;padding:14px;margin:8px 0;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:16px}
 .modal-actions{display:flex;gap:12px;margin-top:16px}
 .cancel{flex:1;background:var(--border);color:var(--text)}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:14px 28px;border-radius:10px;opacity:0;transition:.3s;font-weight:600}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:14px 28px;border-radius:10px;opacity:0;transition:.3s;font-weight:600;z-index:1000}
 .toast.show{opacity:1}
 .empty{text-align:center;padding:40px 20px;color:var(--text-dim)}
 footer{text-align:center;margin-top:40px;color:var(--text-dim);font-size:14px}
+.timer-modal{text-align:center}
+.timer-display{font-size:48px;font-weight:700;margin:20px 0}
 </style>
 </head>
 <body>
 <div class="header">
-  <div>
-    <h1>🎯 Goal Tracker Pro</h1>
-    <div class="name">Welcome back, Sriya!</div>
-  </div>
-  <button class="btn" onclick="openModal()">+ Add Goal</button>
+  <h1>🎯 Goal Tracker Pro</h1>
+  <div class="name">Welcome back, Sriya!</div>
 </div>
 
+<button class="btn" onclick="openModal()">+ Add New Goal</button>
+
 <div class="stats" id="stats"></div>
+<div class="calendar glass" id="calendar"></div>
 <div id="goals"></div>
 
 <div class="modal" id="modal">
@@ -61,77 +70,125 @@ footer{text-align:center;margin-top:40px;color:var(--text-dim);font-size:14px}
       <option>High</option><option selected>Medium</option><option>Low</option>
     </select>
     <input id="deadline" type="date" required>
+    <input id="target" type="number" placeholder="Target hours/sessions (optional)">
     <div class="modal-actions">
       <button class="btn cancel" onclick="closeModal()">Cancel</button>
       <button class="btn" onclick="saveGoal()">Save Goal</button>
     </div>
   </div>
 </div>
-<div class="toast glass" id="toast"></div>
 
+<div class="modal" id="timerModal">
+  <div class="modal-content glass timer-modal">
+    <h2 id="timerGoalName">Study Timer</h2>
+    <div class="timer-display" id="timerDisplay">25:00</div>
+    <div class="modal-actions">
+      <button class="btn cancel" onclick="closeTimer()">Close</button>
+      <button class="btn" onclick="startTimer()" id="timerBtn">Start</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast glass" id="toast"></div>
 <footer>Made for Sriya ✨ Track your dreams</footer>
 
 <script>
-let goals = JSON.parse(localStorage.getItem('goals')||'[]');
-render();
+let goals=JSON.parse(localStorage.getItem('goals')||'[]');
+let timerInterval=null,timerSeconds=1500,currentGoalId=null;
+render();renderCalendar();
 
 function openModal(){document.getElementById('modal').classList.add('show')}
-function closeModal(){
-  document.getElementById('modal').classList.remove('show');
-  document.getElementById('name').value='';
-}
+function closeModal(){document.getElementById('modal').classList.remove('show');document.getElementById('name').value='';document.getElementById('target').value=''}
 
 function saveGoal(){
-  const g={
-    id:Date.now(),
-    name:document.getElementById('name').value.trim(),
-    category:document.getElementById('category').value,
-    priority:document.getElementById('priority').value,
-    deadline:document.getElementById('deadline').value,
-    done:false
-  };
-  if(!g.name||!g.deadline)return toast('Please fill all fields');
-  goals.push(g);
-  localStorage.setItem('goals',JSON.stringify(goals));
-  closeModal();render();toast('Goal added 🎯');
+  const g={id:Date.now(),name:document.getElementById('name').value.trim(),category:document.getElementById('category').value,priority:document.getElementById('priority').value,deadline:document.getElementById('deadline').value,target:parseInt(document.getElementById('target').value)||0,progress:0,done:false};
+  if(!g.name||!g.deadline)return toast('Please fill name & deadline');
+  goals.push(g);localStorage.setItem('goals',JSON.stringify(goals));
+  closeModal();render();renderCalendar();toast('Goal added 🎯');
 }
 
 function toggleGoal(id){
-  goals=goals.map(g=>g.id===id?{...g,done:!g.done}:g);
-  localStorage.setItem('goals',JSON.stringify(goals));
-  render();toast(goals.find(g=>g.id===id).done?'Completed! 🎉':'Marked incomplete');
+  goals=goals.map(g=>g.id===id?{...g,done:!g.done,progress:g.done?0:g.target||100}:g);
+  localStorage.setItem('goals',JSON.stringify(goals));render();toast(goals.find(g=>g.id===id).done?'Completed! 🎉':'Marked incomplete');
 }
 
 function deleteGoal(id){
   if(!confirm('Delete this goal?'))return;
-  goals=goals.filter(g=>g.id!==id);
-  localStorage.setItem('goals',JSON.stringify(goals));
-  render();toast('Goal deleted');
+  goals=goals.filter(g=>g.id!==id);localStorage.setItem('goals',JSON.stringify(goals));
+  render();renderCalendar();toast('Goal deleted');
+}
+
+function openTimer(id){
+  currentGoalId=id;const g=goals.find(g=>g.id===id);
+  document.getElementById('timerGoalName').textContent=g.name;
+  document.getElementById('timerModal').classList.add('show');
+  resetTimer();
+}
+
+function closeTimer(){
+  document.getElementById('timerModal').classList.remove('show');
+  clearInterval(timerInterval);timerInterval=null;
+}
+
+function startTimer(){
+  if(timerInterval){clearInterval(timerInterval);timerInterval=null;document.getElementById('timerBtn').textContent='Start';return}
+  document.getElementById('timerBtn').textContent='Pause';
+  timerInterval=setInterval(()=>{
+    timerSeconds--;updateTimerDisplay();
+    if(timerSeconds<=0){
+      clearInterval(timerInterval);timerInterval=null;
+      const g=goals.find(g=>g.id===currentGoalId);
+      if(g&&g.target){g.progress=Math.min(g.progress+1,g.target);localStorage.setItem('goals',JSON.stringify(goals));render()}
+      toast('Session complete! +1 hour 🎉');resetTimer();closeTimer();
+    }
+  },1000);
+}
+
+function resetTimer(){timerSeconds=1500;updateTimerDisplay();document.getElementById('timerBtn').textContent='Start'}
+function updateTimerDisplay(){
+  const m=Math.floor(timerSeconds/60),s=timerSeconds%60;
+  document.getElementById('timerDisplay').textContent=`${m}:${s.toString().padStart(2,'0')}`;
 }
 
 function render(){
-  const total=goals.length;
-  const done=goals.filter(g=>g.done).length;
-  const pending=total-done;
+  const total=goals.length,done=goals.filter(g=>g.done).length;
+  const today=new Date().toISOString().split('T')[0];
+  const dueToday=goals.filter(g=>g.deadline===today&&!g.done).length;
   document.getElementById('stats').innerHTML=`
-    <div class="card glass"><h3>Total Goals</h3><div class="num">${total}</div></div>
-    <div class="card glass"><h3>Completed</h3><div class="num">${done}</div></div>
+    <div class="card glass"><h3>Total</h3><div class="num">${total}</div></div>
+    <div class="card glass"><h3>Done</h3><div class="num">${done}</div></div>
+    <div class="card glass"><h3>Due Today</h3><div class="num">${dueToday}</div></div>
   `;
-  document.getElementById('goals').innerHTML=goals.length?goals.map(g=>`
-    <div class="card glass goal" style="border-left-color:${g.done?'#10B981':'#2563EB'}">
+  document.getElementById('goals').innerHTML=goals.length?goals.map(g=>{
+    const pct=g.target?(g.progress/g.target*100):(g.done?100:0);
+    return `<div class="card glass goal" style="border-left-color:${g.done?'#10B981':'#2563EB'}">
       <h3>${g.done?'✅ ':''}${g.name}</h3>
-      <div class="meta">${g.category} • ${g.priority} Priority • Due: ${g.deadline}</div>
+      <div class="meta">${g.category} • ${g.priority} • Due: ${g.deadline}</div>
+      ${g.target?`<div class="progress"><div class="progress-bar" style="width:${pct}%"></div></div>
+      <div class="meta">${g.progress}/${g.target} hours</div>`:''}
       <div class="actions">
-        <button class="complete" onclick="toggleGoal(${g.id})">${g.done?'Undo':'Complete'}</button>
-        <button class="delete" onclick="deleteGoal(${g.id})">Delete</button>
+        <button class="complete" onclick="toggleGoal(${g.id})">${g.done?'Undo':'Done'}</button>
+        ${g.category==='Study'?`<button class="timer" onclick="openTimer(${g.id})">Timer</button>`:`<button class="delete" onclick="deleteGoal(${g.id})">Delete</button>`}
       </div>
-    </div>
-  `).join(''):`<div class="card glass empty">No goals yet.<br>Tap + Add Goal to start!</div>`;
+    </div>`
+  }).join(''):`<div class="card glass empty">No goals yet.<br>Tap + Add New Goal to start!</div>`;
+}
+
+function renderCalendar(){
+  const cal=document.getElementById('calendar'),today=new Date();
+  cal.innerHTML='';for(let i=0;i<7;i++){
+    const d=new Date(today);d.setDate(today.getDate()+i);
+    const dateStr=d.toISOString().split('T')[0];
+    const hasGoals=goals.some(g=>g.deadline===dateStr);
+    cal.innerHTML+=`<div class="day ${i===0?'active':''}" style="${hasGoals?'border:2px solid var(--primary)':''}">
+      <div class="d">${d.toLocaleDateString('en',{weekday:'short'})}</div>
+      <div class="n">${d.getDate()}</div>
+    </div>`;
+  }
 }
 
 function toast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2500);
 }
 </script>
