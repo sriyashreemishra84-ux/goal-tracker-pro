@@ -3,34 +3,56 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Goal Tracker Pro</title>
+<title>Goal Tracker Pro - Sriya</title>
 <style>
-:root{--bg:#0F172A;--card:#1E293B;--primary:#2563EB;--text:#fff;--text-dim:#94A3B8}
-*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
-body{background:var(--bg);color:var(--text);padding:16px}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+:root{--bg:#0F172A;--card:#1E293B;--primary:#2563EB;--text:#fff;--text-dim:#94A3B8;--border:#334155}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+body{background:var(--bg);color:var(--text);padding:20px;min-height:100vh}
+.glass{background:rgba(30,41,59,0.7);backdrop-filter:blur(12px);border:1px solid var(--border)}
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
-.btn{background:var(--primary);color:#fff;border:none;padding:12px 20px;border-radius:8px;cursor:pointer;font-weight:600}
-.card{background:var(--card);padding:20px;border-radius:12px;margin:12px 0}
-input,select,textarea{width:100%;padding:12px;margin:8px 0;background:var(--bg);border:1px solid #334155;border-radius:8px;color:var(--text)}
-.goal{border-left:4px solid var(--primary);padding-left:12px;margin:16px 0}
+.header h1{font-size:28px}
+.header .name{color:var(--text-dim);font-size:16px;margin-top:4px}
+.btn{background:var(--primary);color:#fff;border:none;padding:14px 24px;border-radius:10px;cursor:pointer;font-weight:600;font-size:16px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.card{padding:20px;border-radius:16px}
+.card h3{font-size:14px;color:var(--text-dim);margin-bottom:8px}
+.card .num{font-size:32px;font-weight:700}
+.goal{border-left:4px solid var(--primary);padding:16px;margin:16px 0;border-radius:12px}
+.goal h3{font-size:18px;margin-bottom:6px}
+.goal .meta{color:var(--text-dim);font-size:14px;margin-bottom:12px}
+.goal .actions{display:flex;gap:10px}
+.goal .actions button{flex:1;padding:12px;border-radius:8px;border:none;cursor:pointer;font-weight:600}
+.complete{background:var(--primary);color:#fff}
+.delete{background:#EF4444;color:#fff}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);padding:20px;z-index:999}
 .modal.show{display:flex;align-items:center;justify-content:center}
-.modal-content{background:var(--card);padding:24px;border-radius:12px;width:100%;max-width:400px}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card);padding:12px 24px;border-radius:8px;opacity:0;transition:.3s}
+.modal-content{padding:24px;border-radius:16px;width:100%;max-width:400px}
+.modal-content h2{margin-bottom:16px}
+input,select{width:100%;padding:14px;margin:8px 0;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:16px}
+.modal-actions{display:flex;gap:12px;margin-top:16px}
+.cancel{flex:1;background:var(--border);color:var(--text)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:14px 28px;border-radius:10px;opacity:0;transition:.3s;font-weight:600}
 .toast.show{opacity:1}
+.empty{text-align:center;padding:40px 20px;color:var(--text-dim)}
+footer{text-align:center;margin-top:40px;color:var(--text-dim);font-size:14px}
 </style>
 </head>
 <body>
 <div class="header">
-  <h1>🎯 Goal Tracker</h1>
+  <div>
+    <h1>🎯 Goal Tracker Pro</h1>
+    <div class="name">Welcome back, Sriya!</div>
+  </div>
   <button class="btn" onclick="openModal()">+ Add Goal</button>
 </div>
-<div id="stats"></div>
+
+<div class="stats" id="stats"></div>
 <div id="goals"></div>
 
 <div class="modal" id="modal">
-  <div class="modal-content">
-    <h2>Add Goal</h2>
+  <div class="modal-content glass">
+    <h2>New Goal</h2>
     <input id="name" placeholder="Goal Name" required>
     <select id="category">
       <option>Study</option><option>Career</option><option>Finance</option><option>Fitness</option><option>Personal</option><option>Business</option>
@@ -39,76 +61,79 @@ input,select,textarea{width:100%;padding:12px;margin:8px 0;background:var(--bg);
       <option>High</option><option selected>Medium</option><option>Low</option>
     </select>
     <input id="deadline" type="date" required>
-    <div style="display:flex;gap:12px;margin-top:16px">
-      <button class="btn" style="flex:1;background:#334155" onclick="closeModal()">Cancel</button>
-      <button class="btn" style="flex:1" onclick="saveGoal()">Save</button>
+    <div class="modal-actions">
+      <button class="btn cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn" onclick="saveGoal()">Save Goal</button>
     </div>
   </div>
 </div>
-<div class="toast" id="toast"></div>
+<div class="toast glass" id="toast"></div>
+
+<footer>Made for Sriya ✨ Track your dreams</footer>
 
 <script>
 let goals = JSON.parse(localStorage.getItem('goals')||'[]');
 render();
 
 function openModal(){document.getElementById('modal').classList.add('show')}
-function closeModal(){document.getElementById('modal').classList.remove('show')}
+function closeModal(){
+  document.getElementById('modal').classList.remove('show');
+  document.getElementById('name').value='';
+}
 
 function saveGoal(){
-  const g = {
-    id: Date.now(),
-    name: document.getElementById('name').value,
-    category: document.getElementById('category').value,
-    priority: document.getElementById('priority').value,
-    deadline: document.getElementById('deadline').value,
-    done: false
+  const g={
+    id:Date.now(),
+    name:document.getElementById('name').value.trim(),
+    category:document.getElementById('category').value,
+    priority:document.getElementById('priority').value,
+    deadline:document.getElementById('deadline').value,
+    done:false
   };
-  if(!g.name || !g.deadline) return toast('Fill all fields');
+  if(!g.name||!g.deadline)return toast('Please fill all fields');
   goals.push(g);
-  localStorage.setItem('goals', JSON.stringify(goals));
-  closeModal();
-  render();
-  toast('Goal added!');
+  localStorage.setItem('goals',JSON.stringify(goals));
+  closeModal();render();toast('Goal added 🎯');
 }
 
 function toggleGoal(id){
-  goals = goals.map(g=>g.id===id?{...g,done:!g.done}:g);
-  localStorage.setItem('goals', JSON.stringify(goals));
-  render();
+  goals=goals.map(g=>g.id===id?{...g,done:!g.done}:g);
+  localStorage.setItem('goals',JSON.stringify(goals));
+  render();toast(goals.find(g=>g.id===id).done?'Completed! 🎉':'Marked incomplete');
 }
 
 function deleteGoal(id){
-  goals = goals.filter(g=>g.id!==id);
-  localStorage.setItem('goals', JSON.stringify(goals));
-  render();
-  toast('Deleted');
+  if(!confirm('Delete this goal?'))return;
+  goals=goals.filter(g=>g.id!==id);
+  localStorage.setItem('goals',JSON.stringify(goals));
+  render();toast('Goal deleted');
 }
 
 function render(){
-  const total = goals.length;
-  const done = goals.filter(g=>g.done).length;
-  document.getElementById('stats').innerHTML = `
-    <div class="card"><h3>Total: ${total}</h3></div>
-    <div class="card"><h3>Done: ${done}</h3></div>
+  const total=goals.length;
+  const done=goals.filter(g=>g.done).length;
+  const pending=total-done;
+  document.getElementById('stats').innerHTML=`
+    <div class="card glass"><h3>Total Goals</h3><div class="num">${total}</div></div>
+    <div class="card glass"><h3>Completed</h3><div class="num">${done}</div></div>
   `;
-  document.getElementById('goals').innerHTML = goals.map(g=>`
-    <div class="card goal">
-      <h3>${g.name}</h3>
-      <p style="color:var(--text-dim);font-size:14px">${g.category} • ${g.priority} • ${g.deadline}</p>
-      <div style="display:flex;gap:8px;margin-top:12px">
-        <button class="btn" style="flex:1" onclick="toggleGoal(${g.id})">${g.done?'Undo':'Complete'}</button>
-        <button class="btn" style="background:#EF4444" onclick="deleteGoal(${g.id})">Delete</button>
+  document.getElementById('goals').innerHTML=goals.length?goals.map(g=>`
+    <div class="card glass goal" style="border-left-color:${g.done?'#10B981':'#2563EB'}">
+      <h3>${g.done?'✅ ':''}${g.name}</h3>
+      <div class="meta">${g.category} • ${g.priority} Priority • Due: ${g.deadline}</div>
+      <div class="actions">
+        <button class="complete" onclick="toggleGoal(${g.id})">${g.done?'Undo':'Complete'}</button>
+        <button class="delete" onclick="deleteGoal(${g.id})">Delete</button>
       </div>
     </div>
-  `).join('') || '<div class="card">No goals yet. Tap + Add Goal</div>';
+  `).join(''):`<div class="card glass empty">No goals yet.<br>Tap + Add Goal to start!</div>`;
 }
 
 function toast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2000);
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
 }
 </script>
 </body>
-</html>                 
+</html>
